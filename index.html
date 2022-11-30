@@ -1,0 +1,53 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <title>My First FHIR App</title>
+  <meta charset="UTF-8">
+
+  <meta name="description" content="A FHIR example application">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="/index.2cdaf7bc.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css">
+  <script src="/index.40f9d17e.js"></script><script src="/index.b71e74eb.js" defer=""></script>
+</head>
+
+<body>
+
+<div class="card" id="app">
+  <div class="card-body">
+    <a class="btn btn-primary" href="/launch.html" id="launch_link">Click to Authorize</a>
+    <h5>My first SMART on FHIR page!</h5>
+    <h1 id="pt_name">[pt_name ...]</h1>
+    <h3>BMI: <span id="bmi">[calculating...]</span> kg/m<sup>2</sup></h3>
+    <div>
+    </div>
+    <table class="table">
+      <tr>
+        <th>
+          <h2>Weight List</h2>
+        </th>
+        <th>
+          <h2>Height List</h2>
+        </th>
+
+
+      </tr>
+      <tr>
+        <td>
+          <ul id="wt_list">
+            <li>Loading</li>
+          </ul>
+        </td>
+        <td class="align-top">
+          <ul id="ht_list">
+            <li>Loading...</li>
+          </ul>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+</body>
+</html>
