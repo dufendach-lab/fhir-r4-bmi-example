@@ -1,0 +1,34 @@
+{
+  "name": "fhir-r4-bmi-example",
+  "version": "0.0.1",
+  "description": "A basic FHIR app",
+  "type": "module",
+  "scripts": {
+    "build": "parcel build ./src/*.html",
+    "dev": "parcel src/launch.html --open",
+    "start": "npm run build && npm run dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dufendach-lab/fhir-r4-bmi-example.git"
+  },
+  "keywords": [
+    "FHIR",
+    "SMART",
+    "example"
+  ],
+  "author": "Kevin R. Dufendach, MD, MS",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dufendach-lab/fhir-r4-bmi-example/issues"
+  },
+  "homepage": "https://github.com/dufendach-lab/fhir-r4-bmi-example#readme",
+  "dependencies": {
+    "fhirclient": "^2.5.2"
+  },
+  "devDependencies": {
+    "parcel": "^2.8.0",
+    "process": "^0.11.10"
+  }
+}
