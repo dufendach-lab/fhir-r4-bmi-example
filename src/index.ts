@@ -32,10 +32,6 @@ function updatePatientName(name: string) {
 
 ////////////////////////// Weight List /////////////////////////////
 
-// function getObservationByCode(client: Client, code: string) {
-//   return client.request<Observation>(`Observation?code=${code}`)
-// }
-
 type TimedObservationQuantity = {
   value: number;
   unit: string;
@@ -85,6 +81,10 @@ function populateListFromValues(elementId: string, res: Bundle<Observation>) {
   return Promise.resolve(values)
 }
 
+function calculateBMI(wt: number, ht: number) {
+  return wt / Math.pow(ht / 100, 2)
+}
+
 FHIR.oauth2.ready().then(client => {
   document.getElementById("launch_link")?.remove()
   const ptId = client.patient.id;
@@ -93,11 +93,16 @@ FHIR.oauth2.ready().then(client => {
   client.patient.read().then(pt => updatePatientName(getPatientName(pt)))
 
   Promise.all([
-    client.patient.request<Bundle<Observation>>('Observation?code=29463-7'),
-    client.patient.request<Bundle<Observation>>('Observation?code=8302-2')
+    client.patient
+      .request<Bundle<Observation>>('Observation?code=29463-7')
+      .then(weights => populateListFromValues('wt_list', weights)),
+    client.patient
+      .request<Bundle<Observation>>('Observation?code=8302-2')
+      .then(heights => populateListFromValues('ht_list', heights))
   ]).then(([weights, heights]) => {
-    populateListFromValues('wt_list', weights)
-    populateListFromValues('ht_list', heights)
+    const bmiEl = document.getElementById('bmi');
+    if (bmiEl && weights.length > 0 && heights.length > 0) {
+      bmiEl.innerHTML = calculateBMI(weights[weights.length - 1].value, heights[heights.length - 1].value).toFixed(2)
+    }
   })
-
 })
