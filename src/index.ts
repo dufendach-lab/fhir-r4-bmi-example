@@ -34,6 +34,22 @@ function updatePatientName(name: string) {
 //   return client.request<Observation>(`Observation?code=${code}`)
 // }
 
+function getValuesFromBundle(bundle: Bundle<Observation>) {
+  const values: Quantity[] = [];
+
+  if (!bundle.entry) {
+    return values;
+  }
+
+  bundle.entry.forEach(el => {
+    const val = el.resource?.valueQuantity;
+    if (val) values.push(val)
+  })
+  return values;
+}
+
+
+
 FHIR.oauth2.ready().then(client => {
   document.getElementById("launch_link")?.remove()
   const ptId = client.patient.id;
@@ -49,20 +65,13 @@ FHIR.oauth2.ready().then(client => {
       const wt_list = document.getElementById('wt_list');
       if (!wt_list) return;
 
-      if (!res.entry || res.entry?.length === 0) {
-        wt_list.innerHTML = 'No weights listed';
-        return;
+      const values = getValuesFromBundle(res);
+
+      if (values.length === 0) {
+        wt_list.innerHTML = 'No values found';
+      } else {
+        wt_list.innerHTML = '';
+        values.forEach(val => wt_list.innerHTML += `<li>${val?.value} ${val?.unit}</li>`)
       }
-
-      wt_list.innerHTML = '';
-
-      const values: Quantity[] = [];
-
-      res.entry.forEach(el => {
-        const val = el.resource?.valueQuantity;
-        if (val) values.push(val)
-      })
-
-      values.forEach(val => wt_list.innerHTML += `<li>${val?.value} ${val?.unit}</li>`)
     })
 })
