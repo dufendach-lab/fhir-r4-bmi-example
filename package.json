@@ -1,13 +1,17 @@
 {
+  "files": [
+    "src/"
+  ],
   "name": "fhir-r4-bmi-example",
   "version": "0.0.1",
   "description": "A basic FHIR app",
   "type": "module",
   "scripts": {
-    "build": "parcel build ./src/*",
+    "build": "cross-env NODE_ENV=production parcel build ./src/* --public-url .",
     "dev": "parcel src/index.html --open",
     "start": "npm run build && npm run dev",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "gh-pages -d dist"
   },
   "repository": {
     "type": "git",
@@ -29,6 +33,8 @@
     "fhirclient": "^2.5.2"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
+    "gh-pages": "^4.0.0",
     "parcel": "^2.8.0",
     "process": "^0.11.10"
   }
