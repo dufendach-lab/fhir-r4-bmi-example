@@ -32,12 +32,21 @@ function updatePatientName(name: string) {
 
 ////////////////////////// Weight List /////////////////////////////
 
+/**
+ * Stores the value, unit, and time of a quantity Observation
+ */
 type TimedObservationQuantity = {
   value: number;
   unit: string;
   time: dateTime
 }
 
+/**
+ * Create a list of TimedObservationQuantity quantities from a FHIR bundle
+ *
+ * @param bundle FHIR Observation bundle
+ * @param {boolean=} [sort] Whether or not to sort list. Sorts if left blank
+ */
 function getValuesFromBundle(bundle: Bundle<Observation>, sort = true) {
   const values: TimedObservationQuantity[] = [];
   const entries = bundle.entry;
@@ -65,6 +74,12 @@ function getValuesFromBundle(bundle: Bundle<Observation>, sort = true) {
   return values;
 }
 
+/**
+ * Populate a given elementID with the results from a bundle
+ *
+ * @param elementId
+ * @param res
+ */
 function populateListFromValues(elementId: string, res: Bundle<Observation>) {
   const listElement = document.getElementById(elementId);
   if (!listElement) return Promise.reject(`Element '${elementId}' not found`);
@@ -81,8 +96,12 @@ function populateListFromValues(elementId: string, res: Bundle<Observation>) {
   return Promise.resolve(values)
 }
 
-function calculateBMI(wt: number, ht: number) {
-  return wt / Math.pow(ht / 100, 2)
+/**
+ * Calculate a BMI from a given wt and ht
+ * @param values values including a weight in kg, ht in meters
+ */
+function calculateBMI(values: {wt: number, ht: number}) {
+  return values.wt / Math.pow(values.ht, 2)
 }
 
 FHIR.oauth2.ready().then(client => {
@@ -90,8 +109,10 @@ FHIR.oauth2.ready().then(client => {
   const ptId = client.patient.id;
   console.log(ptId)
 
+  // Update patient name
   client.patient.read().then(pt => updatePatientName(getPatientName(pt)))
 
+  // Obtain list of patient weight and heights, update BMI when both bundles have data
   Promise.all([
     client.patient
       .request<Bundle<Observation>>('Observation?code=29463-7')
@@ -102,7 +123,10 @@ FHIR.oauth2.ready().then(client => {
   ]).then(([weights, heights]) => {
     const bmiEl = document.getElementById('bmi');
     if (bmiEl && weights.length > 0 && heights.length > 0) {
-      bmiEl.innerHTML = calculateBMI(weights[weights.length - 1].value, heights[heights.length - 1].value).toFixed(2)
+      bmiEl.innerHTML = calculateBMI({
+        wt: weights[weights.length - 1].value,
+        ht: heights[heights.length - 1].value / 100
+      }).toFixed(2)
     }
   })
 })
