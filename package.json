@@ -4,8 +4,8 @@
   "description": "A basic FHIR app",
   "type": "module",
   "scripts": {
-    "build": "parcel build ./src/*.html",
-    "dev": "parcel src/launch.html --open",
+    "build": "parcel build ./src/*",
+    "dev": "parcel src/index.html --open",
     "start": "npm run build && npm run dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
