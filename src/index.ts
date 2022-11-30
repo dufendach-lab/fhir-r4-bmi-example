@@ -1,5 +1,5 @@
 import FHIR from "fhirclient";
-import {Patient} from "fhir/r4";
+import {Patient, Resource} from "fhir/r4";
 
 /**
  * Extract names from FHIR Patient object
@@ -28,8 +28,22 @@ function updatePatientName(name: string) {
   }
 }
 
+////////////////////////// Weight List /////////////////////////////
+
+// function getObservationByCode(client: Client, code: string) {
+//   return client.request<Observation>(`Observation?code=${code}`)
+// }
+
 FHIR.oauth2.ready().then(client => {
   document.getElementById("launch_link")?.remove()
+  const ptId = client.patient.id;
+  console.log(ptId)
 
   client.patient.read().then(pt => updatePatientName(getPatientName(pt)))
+
+  const code='29463-7'
+  client.patient.request<Resource>(`Observation?code=${code}`).then(res => {
+    console.log(res)
+  })
+
 })
