@@ -92,12 +92,11 @@ FHIR.oauth2.ready().then(client => {
 
   client.patient.read().then(pt => updatePatientName(getPatientName(pt)))
 
-  Promise.all([
-    client.patient.request<Bundle<Observation>>('Observation?code=29463-7'),
-    client.patient.request<Bundle<Observation>>('Observation?code=8302-2')
-  ]).then(([weights, heights]) => {
-    populateListFromValues('wt_list', weights)
-    populateListFromValues('ht_list', heights)
-  })
+  client.patient
+    .request<Bundle<Observation>>('Observation?code=29463-7')
+    .then(weights => populateListFromValues('wt_list', weights))
 
+  client.patient
+    .request<Bundle<Observation>>('Observation?code=29463-7')
+    .then(heights => populateListFromValues('ht_list', heights))
 })
