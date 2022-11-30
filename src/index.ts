@@ -1,5 +1,5 @@
 import FHIR from "fhirclient";
-import {Patient, Resource} from "fhir/r4";
+import {Bundle, Observation, Patient, Quantity} from "fhir/r4";
 
 /**
  * Extract names from FHIR Patient object
@@ -41,9 +41,28 @@ FHIR.oauth2.ready().then(client => {
 
   client.patient.read().then(pt => updatePatientName(getPatientName(pt)))
 
-  const code='29463-7'
-  client.patient.request<Resource>(`Observation?code=${code}`).then(res => {
-    console.log(res)
-  })
+  const code = '29463-7'
+  client.patient.request<Bundle<Observation>>(`Observation?code=${code}`) // note use of back-tick
+    .then(res => {
+      console.log(res)
 
+      const wt_list = document.getElementById('wt_list');
+      if (!wt_list) return;
+
+      if (!res.entry || res.entry?.length === 0) {
+        wt_list.innerHTML = 'No weights listed';
+        return;
+      }
+
+      wt_list.innerHTML = '';
+
+      const values: Quantity[] = [];
+
+      res.entry.forEach(el => {
+        const val = el.resource?.valueQuantity;
+        if (val) values.push(val)
+      })
+
+      values.forEach(val => wt_list.innerHTML += `<li>${val?.value} ${val?.unit}</li>`)
+    })
 })
