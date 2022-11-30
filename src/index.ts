@@ -1,5 +1,7 @@
 import FHIR from "fhirclient";
-import {Bundle, Observation, Patient, Quantity} from "fhir/r4";
+import {Bundle, Observation, Patient} from "fhir/r4";
+import {fhirclient} from "fhirclient/lib/types";
+import dateTime = fhirclient.FHIR.dateTime;
 
 /**
  * Extract names from FHIR Patient object
@@ -34,23 +36,42 @@ function updatePatientName(name: string) {
 //   return client.request<Observation>(`Observation?code=${code}`)
 // }
 
-function getValuesFromBundle(bundle: Bundle<Observation>) {
-  const values: Quantity[] = [];
+type TimedObservationQuantity = {
+  value: number;
+  unit: string;
+  time: dateTime
+}
 
-  if (!bundle.entry) {
-    return values;
+function getValuesFromBundle(bundle: Bundle<Observation>, sort = true) {
+  const values: TimedObservationQuantity[] = [];
+  const entries = bundle.entry;
+
+  if (entries) {
+    entries.forEach(el => {
+      const res = el.resource;
+      if (res?.effectiveDateTime && res.valueQuantity) {
+        const val = res.valueQuantity;
+        if (!val.value || !val.unit) return;
+
+        if (val) values.push({
+          value: val.value,
+          unit: val.unit,
+          time: res.effectiveDateTime
+        })
+      }
+    })
+
+    if (sort) {
+      values.sort((a, b) => (a.time < b.time ? -1 : 1))
+    }
   }
 
-  bundle.entry.forEach(el => {
-    const val = el.resource?.valueQuantity;
-    if (val) values.push(val)
-  })
   return values;
 }
 
 function populateListFromValues(elementId: string, res: Bundle<Observation>) {
   const listElement = document.getElementById(elementId);
-  if (!listElement) return;
+  if (!listElement) return Promise.reject(`Element '${elementId}' not found`);
 
   const values = getValuesFromBundle(res);
 
@@ -60,6 +81,8 @@ function populateListFromValues(elementId: string, res: Bundle<Observation>) {
     listElement.innerHTML = '';
     values.forEach(val => listElement.innerHTML += `<li>${val?.value} ${val?.unit}</li>`)
   }
+
+  return Promise.resolve(values)
 }
 
 FHIR.oauth2.ready().then(client => {
@@ -69,11 +92,12 @@ FHIR.oauth2.ready().then(client => {
 
   client.patient.read().then(pt => updatePatientName(getPatientName(pt)))
 
-  client.patient
-    .request<Bundle<Observation>>('Observation?code=29463-7') // note use of back-tick
-    .then(res => populateListFromValues('wt_list', res))
+  Promise.all([
+    client.patient.request<Bundle<Observation>>('Observation?code=29463-7'),
+    client.patient.request<Bundle<Observation>>('Observation?code=8302-2')
+  ]).then(([weights, heights]) => {
+    populateListFromValues('wt_list', weights)
+    populateListFromValues('ht_list', heights)
+  })
 
-  client.patient
-    .request<Bundle<Observation>>('Observation?code=8302-2') // note use of back-tick
-    .then(res => populateListFromValues('ht_list', res))
 })
