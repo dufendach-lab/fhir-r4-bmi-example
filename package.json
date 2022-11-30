@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/dufendach-lab/fhir-r4-bmi-example#readme",
   "dependencies": {
+    "@types/fhir": "^0.0.35",
     "fhirclient": "^2.5.2"
   },
   "devDependencies": {
