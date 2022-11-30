@@ -48,7 +48,19 @@ function getValuesFromBundle(bundle: Bundle<Observation>) {
   return values;
 }
 
+function populateListFromValues(elementId: string, res: Bundle<Observation>) {
+  const listElement = document.getElementById(elementId);
+  if (!listElement) return;
 
+  const values = getValuesFromBundle(res);
+
+  if (values.length === 0) {
+    listElement.innerHTML = 'No values found';
+  } else {
+    listElement.innerHTML = '';
+    values.forEach(val => listElement.innerHTML += `<li>${val?.value} ${val?.unit}</li>`)
+  }
+}
 
 FHIR.oauth2.ready().then(client => {
   document.getElementById("launch_link")?.remove()
@@ -57,21 +69,11 @@ FHIR.oauth2.ready().then(client => {
 
   client.patient.read().then(pt => updatePatientName(getPatientName(pt)))
 
-  const code = '29463-7'
-  client.patient.request<Bundle<Observation>>(`Observation?code=${code}`) // note use of back-tick
-    .then(res => {
-      console.log(res)
+  client.patient
+    .request<Bundle<Observation>>('Observation?code=29463-7') // note use of back-tick
+    .then(res => populateListFromValues('wt_list', res))
 
-      const wt_list = document.getElementById('wt_list');
-      if (!wt_list) return;
-
-      const values = getValuesFromBundle(res);
-
-      if (values.length === 0) {
-        wt_list.innerHTML = 'No values found';
-      } else {
-        wt_list.innerHTML = '';
-        values.forEach(val => wt_list.innerHTML += `<li>${val?.value} ${val?.unit}</li>`)
-      }
-    })
+  client.patient
+    .request<Bundle<Observation>>('Observation?code=8302-2') // note use of back-tick
+    .then(res => populateListFromValues('ht_list', res))
 })
